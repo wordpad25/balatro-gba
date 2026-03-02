@@ -71,16 +71,16 @@ void joker_init()
     }
 }
 
-Joker* joker_new(u8 id)
+Joker* joker_new(u8 id, u8 edition)
 {
-    if (id >= get_joker_registry_size())
+    if (id >= get_joker_registry_size() || edition >= MAX_EDITIONS)
         return NULL;
 
     Joker* joker = POOL_GET(Joker);
     const JokerInfo* jinfo = get_joker_registry_entry(id);
 
     joker->id = id;
-    joker->modifier = BASE_EDITION; // TODO: Make this a parameter
+    joker->modifier = edition;
     joker->value = jinfo->base_value + edition_price_lut[joker->modifier];
     joker->rarity = jinfo->rarity;
     joker->scoring_state = 0;

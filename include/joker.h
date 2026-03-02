@@ -146,7 +146,7 @@ size_t get_joker_registry_size(void);
 
 void joker_init();
 
-Joker* joker_new(u8 id);
+Joker* joker_new(u8 id, u8 edition);
 void joker_destroy(Joker** joker);
 
 // Unique effects like "Four Fingers" or "Credit Card" will be hard coded into game.c with a
