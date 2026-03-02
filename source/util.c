@@ -113,7 +113,7 @@ static inline void truncate_num_get_remainder_string(
     }
 }
 
-void truncate_uint_to_suffixed_str(
+int truncate_uint_to_suffixed_str(
     uint32_t num,
     int num_req_chars,
     char out_str_buff[UINT_MAX_DIGITS + 1]
@@ -167,7 +167,14 @@ void truncate_uint_to_suffixed_str(
         );
     }
 
-    snprintf(out_str_buff, UINT_MAX_DIGITS + 1, "%lu%s%s", truncated_num, remainder_str, suffix);
+    return snprintf(
+        out_str_buff,
+        UINT_MAX_DIGITS + 1,
+        "%lu%s%s",
+        truncated_num,
+        remainder_str,
+        suffix
+    );
 }
 
 // Avoid uint overflow when add/multiplying score
