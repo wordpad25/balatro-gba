@@ -1,7 +1,7 @@
 export enum Suit {
-  HEARTS = 0,
-  DIAMONDS = 1,
-  CLUBS = 2,
+  DIAMONDS = 0,
+  CLUBS = 1,
+  HEARTS = 2,
   SPADES = 3
 }
 
@@ -27,29 +27,6 @@ export interface Card {
   rank: Rank;
 }
 
-export enum Edition {
-  BASE = 0,
-  FOIL = 1,
-  HOLO = 2,
-  POLY = 3,
-  NEGATIVE = 4
-}
-
-export enum Rarity {
-  COMMON = 0,
-  UNCOMMON = 1,
-  RARE = 2,
-  LEGENDARY = 3
-}
-
-export interface Joker {
-  id: number;
-  name: string;
-  edition: Edition;
-  value: number;
-  rarity: Rarity;
-}
-
 export enum HandType {
   NONE = 0,
   HIGH_CARD = 1,
@@ -67,19 +44,80 @@ export enum HandType {
   FLUSH_FIVE = 13
 }
 
-export interface GameState {
-  deck: Card[];
-  hand: Card[];
+export interface ContainedHandTypes {
+  HIGH_CARD: boolean;
+  PAIR: boolean;
+  TWO_PAIR: boolean;
+  THREE_OF_A_KIND: boolean;
+  STRAIGHT: boolean;
+  FLUSH: boolean;
+  FULL_HOUSE: boolean;
+  FOUR_OF_A_KIND: boolean;
+  STRAIGHT_FLUSH: boolean;
+  ROYAL_FLUSH: boolean;
+  FIVE_OF_A_KIND: boolean;
+  FLUSH_HOUSE: boolean;
+  FLUSH_FIVE: boolean;
+}
+
+export enum GameState {
+  MAIN_MENU,
+  BLIND_SELECT,
+  PLAYING,
+  ROUND_END,
+  SHOP,
+  WIN,
+  LOSE
+}
+
+export enum BlindType {
+  SMALL = 0,
+  BIG = 1,
+  BOSS = 2
+}
+
+export interface Blind {
+  type: BlindType;
+  name: string;
+  multiplier: number;
+  reward: number;
+}
+
+export interface Joker {
+  id: number;
+  name: string;
+  rarity: number;
+  value: number;
+  effect: (context: ScoringContext) => JokerEffect;
+}
+
+export interface JokerEffect {
+  chips?: number;
+  mult?: number;
+  xmult?: number;
+  money?: number;
+  retrigger?: boolean;
+  expire?: boolean;
+  message?: string;
+}
+
+export interface ScoringContext {
+  event: JokerEvent;
+  card?: Card;
   playedCards: Card[];
-  ownedJokers: Joker[];
-  shopJokers: Joker[];
-  money: number;
-  score: number;
-  chips: number;
-  mult: number;
-  hands: number;
-  discards: number;
-  ante: number;
-  round: number;
-  currentBlind: number;
+  handCards: Card[];
+  gameState: any; // Will be more specific
+}
+
+export enum JokerEvent {
+  ON_JOKER_CREATED,
+  ON_HAND_PLAYED,
+  ON_CARD_SCORED,
+  ON_CARD_SCORED_END,
+  ON_CARD_HELD,
+  INDEPENDENT,
+  ON_HAND_SCORED_END,
+  ON_HAND_DISCARDED,
+  ON_ROUND_END,
+  ON_BLIND_SELECTED,
 }

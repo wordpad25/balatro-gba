@@ -5,7 +5,13 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'balatro-red': '#ff4d4d',
+        'balatro-blue': '#4d4dff',
+        'balatro-yellow': '#ffff4d',
+      }
+    },
   },
   plugins: [],
 }

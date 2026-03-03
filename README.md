@@ -154,18 +154,25 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 #### 4. **It says I don't have `Git` or `Make` installed!**
 - Use `pacman -S git` (not required) or `pacman -S make` although make should already be installed if you followed the instructions correctly.
 
-# Migration Map
+# **Web Migration**
+A modern web implementation of Gbalatro has been created in the `/web-app` directory.
 
-This project has been partially migrated to a modern web stack (React + Vite + TypeScript). The migration focuses on the core game logic and providing a web-based UI.
+### Migration Map
+| Source File | Web-App Module | Description |
+|-------------|----------------|-------------|
+| `source/hand_analysis.c` | `src/logic/handAnalysis.ts` | Hand detection and scoring logic |
+| `source/joker_effects.c` | `src/logic/jokers.ts` | Joker behavior and event system |
+| `source/card.c` | `src/types/game.ts` / `src/components/Card.tsx` | Card data models and UI component |
+| `source/game.c` | `src/store/useGameStore.ts` / `src/App.tsx` | Game loop, scoring engine, and main UI |
+| `source/blind.c` | `src/logic/blinds.ts` | Blind requirement and reward logic |
+| `include/game.h` | `src/types/game.ts` | Global shared type definitions |
 
-| Source File (C) | Target File (TypeScript) | Description |
-| --- | --- | --- |
-| `source/hand_analysis.c` | `web-app/src/logic/scoring.ts` | Hand distribution and scoring logic. |
-| `include/card.h` | `web-app/src/types/game.ts` | Data structures for cards and game state. |
-| `source/joker.c` | `web-app/src/logic/jokers.ts` | Initial joker effects implementation. |
-| `source/game.c` | `web-app/src/store/useGameStore.ts` | Global game state management via Zustand. |
-| N/A | `web-app/src/App.tsx` | Main React UI component and layout. |
-| N/A | `web-app/src/test/setup.ts` | Vitest setup for unit testing. |
+### Tech Stack
+- **Framework:** React + Vite
+- **Language:** TypeScript
+- **State Management:** Zustand
+- **Styling:** Tailwind CSS
+- **Testing:** Vitest
 
 # **Credits:**
 ## **Game**
