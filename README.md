@@ -154,6 +154,25 @@ Disregard Steps 3-4 and instead click the green code button on the main reposito
 #### 4. **It says I don't have `Git` or `Make` installed!**
 - Use `pacman -S git` (not required) or `pacman -S make` although make should already be installed if you followed the instructions correctly.
 
+# **Web Migration**
+A modern web implementation of Gbalatro has been created in the `/web-app` directory.
+
+### Migration Map
+| Source File | Web-App Module | Description |
+|-------------|----------------|-------------|
+| `source/hand_analysis.c` | `src/logic/handAnalysis.ts` | Hand detection and scoring logic |
+| `source/joker_effects.c` | `src/logic/jokers.ts` (Planned) | Joker behavior and events |
+| `source/card.c` | `src/types/game.ts` / `src/components/Card.tsx` | Card data models and UI component |
+| `source/game.c` | `src/store/useGameStore.ts` / `src/App.tsx` | Game state, loop, and main UI |
+| `include/game.h` | `src/types/game.ts` | Shared type definitions |
+
+### Tech Stack
+- **Framework:** React + Vite
+- **Language:** TypeScript
+- **State Management:** Zustand
+- **Styling:** Tailwind CSS
+- **Testing:** Vitest
+
 # **Credits:**
 ## **Game**
 This GBA implementation is based on Balatro which is designed and created by LocalThunk and published by Playstack.
