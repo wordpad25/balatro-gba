@@ -58,6 +58,21 @@ https://github.com/user-attachments/assets/54a9e2e9-1a02-48d5-bb9d-5ab257a7e03b
 
 If you would like to contribute, please read CONTRIBUTING.md.
 
+## **Balatro Web-App (Port)**
+
+A React, Vite, and TypeScript port of the logic has been built in the `/web-app` directory.
+
+### Running the Web Version
+1. `cd web-app`
+2. `npm install`
+3. `npm run dev`
+
+### Mapping from C to TS
+- `source/card.c` & `include/card.h` -> `web-app/src/logic/card.ts`
+- `source/hand_analysis.c` & `include/hand_analysis.h` -> `web-app/src/logic/hand_analysis.ts`
+- `source/blind.c` & `include/blind.h` -> `web-app/src/logic/blind.ts`
+- `source/game.c` -> `web-app/src/logic/game.ts` (Enums and stateless logic) & `web-app/src/store/useGameStore.ts` (Global State representation via Zustand).
+
 # **Build Instructions:**
 
 ## **-Docker-**
