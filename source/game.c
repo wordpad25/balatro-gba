@@ -1063,10 +1063,15 @@ void display_money()
     tte_erase_rect_wrapper(MONEY_TEXT_RECT);
 
     char money_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null terminator and "$" sign
-    snprintf(money_str_buff, sizeof(money_str_buff), "$%d", money);
+    int money_str_len = snprintf(money_str_buff, sizeof(money_str_buff), "$%d", money);
 
     // Bias left so the number is centered and the "$" sign is on the left
-    update_text_rect_to_center_str(&money_text_rect, money_str_buff, SCREEN_LEFT);
+    update_text_rect_to_center_str(
+        &money_text_rect,
+        money_str_buff,
+        money_str_len,
+        SCREEN_LEFT
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",
@@ -1087,13 +1092,18 @@ void display_chips(void)
     tte_erase_rect_wrapper(chips_text_overflow_rect);
 
     char chips_str_buff[UINT_MAX_DIGITS + 1];
-    truncate_uint_to_suffixed_str(
+    int chips_str_len = truncate_uint_to_suffixed_str(
         chips,
         rect_width(&chips_text_rect) / TTE_CHAR_SIZE,
         chips_str_buff
     );
 
-    update_text_rect_to_right_align_str(&chips_text_rect, chips_str_buff, OVERFLOW_LEFT);
+    update_text_rect_to_right_align_str(
+        &chips_text_rect,
+        chips_str_buff,
+        chips_str_len,
+        OVERFLOW_LEFT
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000;}%s",
@@ -1113,7 +1123,11 @@ void display_mult(void)
     tte_erase_rect_wrapper(mult_text_overflow_rect);
 
     char mult_str_buff[UINT_MAX_DIGITS + 1];
-    truncate_uint_to_suffixed_str(mult, rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE, mult_str_buff);
+    truncate_uint_to_suffixed_str(
+        mult,
+        rect_width(&MULT_TEXT_RECT) / TTE_CHAR_SIZE,
+        mult_str_buff
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000;}%s",
@@ -1743,12 +1757,17 @@ static void display_temp_score(u32 value)
 {
     char temp_score_str_buff[UINT_MAX_DIGITS + 1];
     Rect temp_score_rect = TEMP_SCORE_RECT;
-    truncate_uint_to_suffixed_str(
+    int temp_score_str_len = truncate_uint_to_suffixed_str(
         value,
         rect_width(&temp_score_rect) / TTE_CHAR_SIZE,
         temp_score_str_buff
     );
-    update_text_rect_to_center_str(&temp_score_rect, temp_score_str_buff, SCREEN_RIGHT);
+    update_text_rect_to_center_str(
+        &temp_score_rect,
+        temp_score_str_buff,
+        temp_score_str_len,
+        SCREEN_RIGHT
+    );
 
     tte_erase_rect_wrapper(TEMP_SCORE_RECT);
     tte_printf(
@@ -1768,8 +1787,12 @@ static void display_score(u32 value)
 
     char score_str_buff[UINT_MAX_DIGITS + 1];
 
-    truncate_uint_to_suffixed_str(value, rect_width(&score_rect) / TTE_CHAR_SIZE, score_str_buff);
-    update_text_rect_to_center_str(&score_rect, score_str_buff, SCREEN_RIGHT);
+    int score_str_len = truncate_uint_to_suffixed_str(
+        value,
+        rect_width(&score_rect) / TTE_CHAR_SIZE,
+        score_str_buff
+    );
+    update_text_rect_to_center_str(&score_rect, score_str_buff, score_str_len, SCREEN_RIGHT);
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",
@@ -1942,14 +1965,19 @@ static void game_round_on_init()
 
     char blind_req_str_buff[UINT_MAX_DIGITS + 1];
 
-    truncate_uint_to_suffixed_str(
+    int blind_req_str_len = truncate_uint_to_suffixed_str(
         blind_requirement,
         rect_width(&BLIND_REQ_TEXT_RECT) / TTE_CHAR_SIZE,
         blind_req_str_buff
     );
 
     // Update text rect for right alignment AFTER shortening the number
-    update_text_rect_to_right_align_str(&blind_req_text_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+    update_text_rect_to_right_align_str(
+        &blind_req_text_rect,
+        blind_req_str_buff,
+        blind_req_str_len,
+        OVERFLOW_RIGHT
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",
@@ -3595,9 +3623,14 @@ static void game_round_end_display_finished_blind()
      * so there's enough room for sure.
      */
     char blind_req_str_buff[UINT_MAX_DIGITS + 1];
-    snprintf(blind_req_str_buff, sizeof(blind_req_str_buff), "%lu", blind_req);
+    int blind_req_str_len = snprintf(blind_req_str_buff, sizeof(blind_req_str_buff), "%lu", blind_req);
 
-    update_text_rect_to_right_align_str(&blind_req_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+    update_text_rect_to_right_align_str(
+        &blind_req_rect,
+        blind_req_str_buff,
+        blind_req_str_len,
+        OVERFLOW_RIGHT
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",
@@ -3914,9 +3947,9 @@ static void print_price_under_sprite_object(SpriteObject* sprite_object, int pri
 
     char price_str_buff[INT_MAX_DIGITS + 2]; // + 2 for null-terminator and "$"
 
-    snprintf(price_str_buff, sizeof(price_str_buff), "$%d", price);
+    int price_str_len = snprintf(price_str_buff, sizeof(price_str_buff), "$%d", price);
 
-    update_text_rect_to_center_str(&price_rect, price_str_buff, SCREEN_LEFT);
+    update_text_rect_to_center_str(&price_rect, price_str_buff, price_str_len, SCREEN_LEFT);
 
     tte_printf("#{P:%d,%d; cx:0x%X000}$%d", price_rect.left, price_rect.top, TTE_YELLOW_PB, price);
 }
@@ -4005,7 +4038,7 @@ static void game_shop_create_items(void)
 
         set_shop_joker_avail(joker_id, false);
 
-        JokerObject* joker_object = joker_object_new(joker_new(joker_id));
+        JokerObject* joker_object = joker_object_new(joker_new(joker_id, BASE_EDITION));
 
         joker_object->sprite_object->x = int2fx(120 + i * CARD_SPRITE_SIZE);
         joker_object->sprite_object->y = int2fx(160);
@@ -4586,13 +4619,18 @@ static inline void game_blind_select_print_blind_req(enum BlindType blind)
     u32 blind_req = blind_get_requirement(blind, ante);
 
     char blind_req_str_buff[UINT_MAX_DIGITS + 1];
-    truncate_uint_to_suffixed_str(
+    int blind_req_str_len = truncate_uint_to_suffixed_str(
         blind_req,
         rect_width(&blind_req_score_rect) / TTE_CHAR_SIZE,
         blind_req_str_buff
     );
 
-    update_text_rect_to_right_align_str(&blind_req_score_rect, blind_req_str_buff, OVERFLOW_RIGHT);
+    update_text_rect_to_right_align_str(
+        &blind_req_score_rect,
+        blind_req_str_buff,
+        blind_req_str_len,
+        OVERFLOW_RIGHT
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",
@@ -4613,9 +4651,15 @@ static inline void game_blind_select_print_blind_reward(enum BlindType blind)
     blind_reward_rect.bottom += TILE_SIZE;
 
     char blind_reward_str_buff[UINT_MAX_DIGITS + 2]; // +2 for null terminator and "$"
-    snprintf(blind_reward_str_buff, sizeof(blind_reward_str_buff), "$%d", blind_reward);
+    int blind_reward_str_len =
+        snprintf(blind_reward_str_buff, sizeof(blind_reward_str_buff), "$%d", blind_reward);
 
-    update_text_rect_to_right_align_str(&blind_reward_rect, blind_reward_str_buff, OVERFLOW_RIGHT);
+    update_text_rect_to_right_align_str(
+        &blind_reward_rect,
+        blind_reward_str_buff,
+        blind_reward_str_len,
+        OVERFLOW_RIGHT
+    );
 
     tte_printf(
         "#{P:%d,%d; cx:0x%X000}%s",

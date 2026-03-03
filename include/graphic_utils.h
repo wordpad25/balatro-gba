@@ -15,6 +15,8 @@
 #ifndef GRAPHIC_UTILS_H
 #define GRAPHIC_UTILS_H
 
+#include "util.h"
+
 #include <tonc_math.h>
 #include <tonc_video.h>
 
@@ -282,13 +284,16 @@ void tte_erase_rect_wrapper(Rect rect);
  * @param rect is in number of pixels but should be a multiple of TILE_SIZE, so it's a whole number
  * of tiles to fit TTE characters
  *
- * @param num number to display
+ * @param str   The string to align.
+ *
+ * @param len   The length of the string, or @ref UNDEFINED to call strlen().
  *
  * @param overflow_direction either OVERFLOW_LEFT or OVERFLOW_RIGHT.
  */
 void update_text_rect_to_right_align_str(
     Rect* rect,
     const char* str,
+    int len,
     enum OverflowDir overflow_direction
 );
 
@@ -302,6 +307,8 @@ void update_text_rect_to_right_align_str(
  *
  * @param str   The string, the center of the string will be at the center of the updated rect.
  *
+ * @param len   The length of the string, or @ref UNDEFINED to call strlen().
+ *
  * @param bias_direction    Which direction to bias when the string can't be evenly centered
  *                          with respect to char tiles.
  *                          Examples:
@@ -311,7 +318,12 @@ void update_text_rect_to_right_align_str(
  *                          |A|B|C|D| |     - Bias left
  *                          | |A|B|C|D|     - Bias right
  */
-void update_text_rect_to_center_str(Rect* rect, const char* str, enum ScreenHorzDir bias_direction);
+void update_text_rect_to_center_str(
+    Rect* rect,
+    const char* str,
+    int len,
+    enum ScreenHorzDir bias_direction
+);
 
 /**
  * @brief Copies 16 bit data from src to dst, applying a palette offset to the data.

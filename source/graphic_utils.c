@@ -311,11 +311,11 @@ void tte_erase_rect_wrapper(Rect rect)
 void update_text_rect_to_right_align_str(
     Rect* rect,
     const char* str,
+    int len,
     enum OverflowDir overflow_direction
 )
 {
-    // TODO: Allow passing string length to avoid calling strlen()?
-    int str_len = strlen(str);
+    int str_len = (len == UNDEFINED) ? (int)strlen(str) : len;
     if (overflow_direction == OVERFLOW_LEFT)
     {
         rect->left = max(0, rect->right - str_len * TTE_CHAR_SIZE);
@@ -329,14 +329,19 @@ void update_text_rect_to_right_align_str(
     }
 }
 
-void update_text_rect_to_center_str(Rect* rect, const char* str, enum ScreenHorzDir bias_direction)
+void update_text_rect_to_center_str(
+    Rect* rect,
+    const char* str,
+    int len,
+    enum ScreenHorzDir bias_direction
+)
 {
     if (rect == NULL || str == NULL)
     {
         return;
     }
 
-    int text_width_chars = strlen(str);
+    int text_width_chars = (len == UNDEFINED) ? (int)strlen(str) : len;
     int rect_width_chars = rect_width(rect) / TTE_CHAR_SIZE;
 
     bool bias_right = (bias_direction == SCREEN_RIGHT);
