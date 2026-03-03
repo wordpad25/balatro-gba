@@ -161,10 +161,11 @@ A modern web implementation of Gbalatro has been created in the `/web-app` direc
 | Source File | Web-App Module | Description |
 |-------------|----------------|-------------|
 | `source/hand_analysis.c` | `src/logic/handAnalysis.ts` | Hand detection and scoring logic |
-| `source/joker_effects.c` | `src/logic/jokers.ts` (Planned) | Joker behavior and events |
+| `source/joker_effects.c` | `src/logic/jokers.ts` | Joker behavior and event system |
 | `source/card.c` | `src/types/game.ts` / `src/components/Card.tsx` | Card data models and UI component |
-| `source/game.c` | `src/store/useGameStore.ts` / `src/App.tsx` | Game state, loop, and main UI |
-| `include/game.h` | `src/types/game.ts` | Shared type definitions |
+| `source/game.c` | `src/store/useGameStore.ts` / `src/App.tsx` | Game loop, scoring engine, and main UI |
+| `source/blind.c` | `src/logic/blinds.ts` | Blind requirement and reward logic |
+| `include/game.h` | `src/types/game.ts` | Global shared type definitions |
 
 ### Tech Stack
 - **Framework:** React + Vite

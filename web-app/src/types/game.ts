@@ -70,6 +70,19 @@ export enum GameState {
   LOSE
 }
 
+export enum BlindType {
+  SMALL = 0,
+  BIG = 1,
+  BOSS = 2
+}
+
+export interface Blind {
+  type: BlindType;
+  name: string;
+  multiplier: number;
+  reward: number;
+}
+
 export interface Joker {
   id: number;
   name: string;

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { GameState, Card, Joker, HandType, Suit, Rank } from '../types/game';
+import { GameState, Card, Joker, HandType, Suit, Rank, BlindType, JokerEvent, ScoringContext } from '../types/game';
 import { analyzeHand, getBestHand } from '../logic/handAnalysis';
+import { getBlindRequirement, getBlindReward } from '../logic/blinds';
 
 interface GameStore {
   gameState: GameState;
@@ -9,6 +10,8 @@ interface GameStore {
   mult: number;
   score: number;
   targetScore: number;
+  ante: number;
+  currentBlindType: BlindType;
   handsRemaining: number;
   discardsRemaining: number;
   hand: Card[];
@@ -17,9 +20,11 @@ interface GameStore {
 
   // Actions
   setGameState: (state: GameState) => void;
+  selectBlind: (type: BlindType) => void;
   drawCard: () => void;
   discardHand: (selectedIds: string[]) => void;
   playHand: (selectedIds: string[]) => void;
+  cashOut: () => void;
   resetGame: () => void;
 }
 
@@ -64,6 +69,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   mult: 0,
   score: 0,
   targetScore: 300,
+  ante: 1,
+  currentBlindType: BlindType.SMALL,
   handsRemaining: 4,
   discardsRemaining: 4,
   hand: [],
@@ -71,6 +78,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
   jokers: [],
 
   setGameState: (state) => set({ gameState: state }),
+
+  selectBlind: (type) => {
+    const { ante } = get();
+    set({
+      currentBlindType: type,
+      targetScore: getBlindRequirement(type, ante),
+      gameState: GameState.PLAYING,
+      score: 0,
+      handsRemaining: 4,
+      discardsRemaining: 4,
+      hand: [],
+      deck: [...INITIAL_DECK].sort(() => Math.random() - 0.5)
+    });
+  },
 
   drawCard: () => {
     const { deck, hand } = get();
@@ -84,57 +105,96 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const { hand, discardsRemaining } = get();
     if (discardsRemaining <= 0) return;
     const newHand = hand.filter(card => !selectedIds.includes(card.id));
-    set({
-      hand: newHand,
-      discardsRemaining: discardsRemaining - 1
-    });
+
     // Draw back up to 8
-    const currentStore = get();
-    let updatedHand = [...currentStore.hand];
-    let updatedDeck = [...currentStore.deck];
+    const { deck } = get();
+    let updatedHand = [...newHand];
+    let updatedDeck = [...deck];
     while (updatedHand.length < 8 && updatedDeck.length > 0) {
       updatedHand.push(updatedDeck.pop()!);
     }
-    set({ hand: updatedHand, deck: updatedDeck });
+
+    set({
+      hand: updatedHand,
+      deck: updatedDeck,
+      discardsRemaining: discardsRemaining - 1
+    });
   },
 
   playHand: (selectedIds) => {
-    const { hand, handsRemaining, score, targetScore } = get();
-    if (handsRemaining <= 0) return;
+    const state = get();
+    if (state.handsRemaining <= 0) return;
 
-    const selectedCards = hand.filter(card => selectedIds.includes(card.id));
+    const selectedCards = state.hand.filter(card => selectedIds.includes(card.id));
     const analysis = analyzeHand(selectedCards);
     const bestHand = getBestHand(analysis);
     const baseValues = HAND_BASE_VALUES[bestHand];
 
-    const cardChips = selectedCards.reduce((sum, card) => sum + getCardScoringValue(card.rank), 0);
-    const finalChips = baseValues.chips + cardChips;
-    const finalMult = baseValues.mult;
-    const handScore = finalChips * finalMult;
+    // Scoring Context
+    const baseCtx: Omit<ScoringContext, 'event' | 'card'> = {
+      playedCards: selectedCards,
+      handCards: state.hand,
+      gameState: { containedHands: analysis }
+    };
 
-    const newScore = score + handScore;
-    const newHand = hand.filter(card => !selectedIds.includes(card.id));
+    let finalChips = baseValues.chips;
+    let finalMult = baseValues.mult;
 
-    set({
-      score: newScore,
-      handsRemaining: handsRemaining - 1,
-      hand: newHand
+    // 1. Individual Card Scored
+    selectedCards.forEach(card => {
+      finalChips += getCardScoringValue(card.rank);
+
+      state.jokers.forEach(joker => {
+        const effect = joker.effect({ ...baseCtx, event: JokerEvent.ON_CARD_SCORED, card });
+        if (effect.chips) finalChips += effect.chips;
+        if (effect.mult) finalMult += effect.mult;
+      });
     });
 
-    if (newScore >= targetScore) {
-      setTimeout(() => set({ gameState: GameState.ROUND_END }), 500);
-    } else if (handsRemaining <= 1) {
-      setTimeout(() => set({ gameState: GameState.LOSE }), 500);
-    }
+    // 2. Independent Joker Effects
+    state.jokers.forEach(joker => {
+      const effect = joker.effect({ ...baseCtx, event: JokerEvent.INDEPENDENT });
+      if (effect.chips) finalChips += effect.chips;
+      if (effect.mult) finalMult += effect.mult;
+      if (effect.xmult) finalMult *= effect.xmult;
+    });
+
+    const handScore = finalChips * finalMult;
+    const newScore = state.score + handScore;
+    const newHand = state.hand.filter(card => !selectedIds.includes(card.id));
 
     // Draw back up to 8
-    const currentStore = get();
-    let updatedHand = [...currentStore.hand];
-    let updatedDeck = [...currentStore.deck];
+    let updatedHand = [...newHand];
+    let updatedDeck = [...state.deck];
     while (updatedHand.length < 8 && updatedDeck.length > 0) {
       updatedHand.push(updatedDeck.pop()!);
     }
-    set({ hand: updatedHand, deck: updatedDeck });
+
+    set({
+      score: newScore,
+      handsRemaining: state.handsRemaining - 1,
+      hand: updatedHand,
+      deck: updatedDeck
+    });
+
+    if (newScore >= state.targetScore) {
+      setTimeout(() => set({ gameState: GameState.ROUND_END }), 500);
+    } else if (state.handsRemaining <= 1) {
+      setTimeout(() => set({ gameState: GameState.LOSE }), 500);
+    }
+  },
+
+  cashOut: () => {
+    const { money, currentBlindType, handsRemaining, ante } = get();
+    const reward = getBlindReward(currentBlindType);
+    const interest = Math.min(5, Math.floor(money / 5));
+    const nextAnte = currentBlindType === BlindType.BOSS ? ante + 1 : ante;
+
+    set({
+      money: money + reward + handsRemaining + interest,
+      ante: nextAnte,
+      gameState: GameState.SHOP
+    });
   },
 
   resetGame: () => set({
@@ -142,6 +202,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     chips: 0,
     mult: 0,
     score: 0,
+    targetScore: 300,
+    ante: 1,
+    currentBlindType: BlindType.SMALL,
     handsRemaining: 4,
     discardsRemaining: 4,
     hand: [],
